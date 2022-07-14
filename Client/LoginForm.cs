@@ -103,7 +103,7 @@ namespace Client
             _log.Info("AddNewUser was clicked");
             buttonAddNewUser.Enabled = false;
             buttonLogin.Enabled = false;
-            labelAdding.Text = "Adding the new User, plase wait";
+            labelAdding.Text = "Adding the new User, please wait";
             if (textBoxName.Text == "")
             {
                 _log.Warn("Name is empty\n");

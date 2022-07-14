@@ -22,7 +22,7 @@ namespace Client
                 _log.Info("Closing Corectly\n");
                 return;
             }
-            _log.Info("connection don't exist or is closed\n");
+            _log.Info("connection does not exist or is closed\n");
 
         }
         public void setForm(ChatForm chatForm)

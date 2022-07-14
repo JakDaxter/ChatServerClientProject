@@ -32,7 +32,7 @@ namespace Client
         }
 
         /*
-         * Add and Configuracion the DataGridView 
+         * Configure and put data to DataGridView
          */
         public async void SetDataInFrom()
         {
@@ -81,7 +81,7 @@ namespace Client
             _log.Info("Deny button are clicked");
             if (dataGridViewFriendRequest.CurrentCell == null)
             {
-                _log.Warn("Are not selected a request");
+                _log.Warn("Thre is no request selected\n");
                 MessageBox.Show("Select a request");
                 return;
             }
@@ -116,7 +116,7 @@ namespace Client
             _log.Info("Accept button are clicked");
             if (dataGridViewFriendRequest.CurrentCell == null) //Error if not user is selected
             {
-                _log.Warn("Are not selected a request\n");
+                _log.Warn("Thre is no request selected\n");
                 MessageBox.Show("Select a request");
                 return;
             }
@@ -145,11 +145,11 @@ namespace Client
             }
         }
         /*
-         * When the form is close notify parent ChatFrom that it has been closed 
+         * When the form is closed notify parent ChatFrom that it has been closed 
          */
         private void FriendRequestForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            _log.Info("Form are closed, notify ChatForm of this event");
+            _log.Info("Form is closed, notify ChatForm of this event");
             _chatForm.FormRequestClose();
             _log.Info("Notify Completed\n");
         }
@@ -165,14 +165,14 @@ namespace Client
                 _mut.WaitOne();
                 if (InvokeRequired)
                 {
-                    if (!_IAccept) // if is not the From who start the notify, because it don't need to change data
+                    if (!_IAccept) // if it is not the From which started the notify, the data does not have to be changed
                     {
                         _log.Info("This form is not the started of the events");
                         this.Invoke(new Action(() => ReloadRequest()));
                     }
                     else
                     {
-                        _log.Info("The evenst are started from this form");
+                        _log.Info("The event are started from this form");
                         _IAccept = false;
                     }
 
@@ -185,7 +185,7 @@ namespace Client
             }
         }
         /*
-         * If a request is set from an other User when this from is open, reload all list, and keep selected row 
+         * If a request is set from another User when this from is open, reload all list, and keep selected row 
          */
         private async void ReloadRequest()
         {
@@ -198,7 +198,7 @@ namespace Client
             _users.Clear();
             var list = await _client.GetFromUsersInFriendRequestFromUser(_user.IdUser.ToString());
             list.ForEach(x => _users.Add(x));
-            _log.Info("Are data added in list");
+            _log.Info("Dara is added to list");
             dataGridViewFriendRequest.DataSource = _users;
             if (idUser != null)
             {
@@ -213,7 +213,7 @@ namespace Client
                     }
 
                 }
-                _log.Error("The selected row not exist in new data");
+                _log.Error("The selected row does not exist in new data");
                 MessageBox.Show("Error: The selected row not exist in new data");
             }
             _log.Info("ReloadRequest is completed\n");

@@ -92,8 +92,8 @@ namespace Client
             if (textBoxNewFriendRequest.Text == _user.Name)
             {
                 _mut.ReleaseMutex();
-                _log.Warn("User try to add it to a friend\n");
-                MessageBox.Show("You cant add you to friends");
+                _log.Warn("User tried to add himself to a friends\n");
+                MessageBox.Show("You can not add yourself to friends");
                 return;
             }
             try
@@ -134,14 +134,14 @@ namespace Client
             {
                 if (dataGridViewChat.CurrentCell == null)
                 {
-                    _log.Warn("User don't select a Chat");
+                    _log.Warn("User didn't selected a Chat");
                     MessageBox.Show("Select a Chat first");
                     return;
                 }
                 if (textBoxNewMessage.Text == "")
                 {
-                    _log.Warn("User don't write a message");
-                    MessageBox.Show("No have message");
+                    _log.Warn("Empty Message");
+                    MessageBox.Show("Empty Message");
                     return;
                 }
                 var ok = await _client.AddNewMessage(textBoxNewMessage.Text, _actualChatId.ToString(), _user.Name);
@@ -183,7 +183,7 @@ namespace Client
         #endregion
         #region FormEvents
         /*
-         * Event where Form is closed, logout user and Close RabbitMQ conection
+         * Event when Form is closed, logout User and close RabbitMQ Connection
          */
         private async void ChatForm_FormClosed(object sender, FormClosedEventArgs e)
         {
@@ -305,7 +305,7 @@ namespace Client
          * Event for a Cell for dataFridViewChat is Clicked
          * If the column is IsMuted, change the IsMuted value
          * If is other column change Chat:
-         *  Set up all componets That was relation whit Chat and change values from new Chat
+         *  Set up all Form components in relation with Chats
          *  Put new Messages in data listBoxMessages
          *  Set up the listBoxMessages to the last messages
          *  Update the parameter NewMessageInChat to 0 if it has diferent value
@@ -329,7 +329,7 @@ namespace Client
                 return;
             }
             if (dataGridViewChat.CurrentRow.Index != dataGridViewChat.Rows.Count - 1 && _actualChatId != Guid.Parse((string)dataGridViewChat.CurrentRow.Cells["IdChat"].Value))
-            { //bindingList, adding null last row and the the chat are not the same
+            { //bindingList, adding null last row and the chat are not the same
                 _log.Info("The Cell is from other Chat, start changing data");
                 _actualChatId = Guid.Parse((string)dataGridViewChat.CurrentRow.Cells["IdChat"].Value);
                 labelChatName.Text = $"Chat Name: {(string)dataGridViewChat.CurrentRow.Cells["Name"].Value}";
@@ -353,14 +353,14 @@ namespace Client
             }
             else
             {
-                _log.Info("The selected cell are in last null row or in the same row whit the last selected row");
+                _log.Info("The selected cell are in last null row or in the same row with the last selected row");
             }
             _mut.ReleaseMutex();
             _log.Info("Cell clicked event is completed\n");
         }
         /*
          * Set Current cell to last selected Chat by User
-         * if User don't select a Chat then deselect Cell
+         * if User didn't select a Chat then deselect Cell
          */
         private void dataGridViewChat_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
@@ -373,14 +373,14 @@ namespace Client
             else
             {
                 dataGridViewChat.CurrentCell = null;
-                _log.Info("User don't select a Chat before this event, do any");
+                _log.Info("The user has not selected any Chat before this event, therefore nothing is done");
             }
             _log.Info("ColumnHeader in dataGridViewChat clicked event was completed\n");
         }
         #endregion
         #region ListBoxMessageUpgrate
         /*
-         * If Mouse is in listBoxMessage, lock if in Chat have new Messages and the User lock the last message
+         * If Mouse is in listBoxMessage, Lock in chat for new messages and lock the last message
          *  change the value of parameter NEwMessagesInChat to 0  
          */
         private async void listBoxMessage_MouseHover(object sender, EventArgs e)
@@ -398,7 +398,7 @@ namespace Client
             _log.Info("Hover in listBoxMessage event was completed");
         }
         /*
-         * If Mouse leave listBoxMessage, lock if in Chat have new Messages and the User lock the last message
+         * If Mouse is in listBoxMessage, Lock in chat for new messages and lock the last message
          *  change the value of parameter NEwMessagesInChat to 0  
          */
         private async void listBoxMessage_MouseLeave(object sender, EventArgs e)
@@ -426,7 +426,7 @@ namespace Client
             _formRequest = null;
         }
         /*
-         * Use when the dataGridViewChat is change, and have new items
+         * Use when the dataGridViewChat is change, and has new items
          * Change the new selected Cell to last cell User selected
          */
         private void SetCurrentCellToCurrentChat()
@@ -436,7 +436,7 @@ namespace Client
             {
                 foreach (DataGridViewRow row in dataGridViewChat.Rows)
                 {
-                    if (row.Index != dataGridViewChat.Rows.Count - 1) //SortableBinfingList add a last row whit all null cells by default, is need to skip it
+                    if (row.Index != dataGridViewChat.Rows.Count - 1) //SortableBinfingList add a last row with all null cells by default, is need to skip it
                     {
                         if (Guid.Parse((string)row.Cells["IdChat"].Value) == _actualChatId)
                         {
@@ -512,7 +512,7 @@ namespace Client
             }
         }
         /*Notify
-         * When a new Chat is was added for this User:
+         * When a new Chat was added for this User:
          *  Get all Chats and put they in dataGridViewChat
          *  Sort the Chats
          *  deselect curent cell
@@ -567,7 +567,7 @@ namespace Client
             _log.Info("ReloadChatsAsync are completed\n");
         }
         /*Notify
-         * A User set to this User a New FriendReques
+         * A User send to this User a New FriendRequest
          * Change the value of button to correspond the new value
          */
         public void NewFriendRequest(string text)
