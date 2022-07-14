@@ -20,9 +20,9 @@ namespace Server
         private IList<Guid> _loggedUsers;
         private IMyRabbitMQProducer _rabbitmq;
         /*
-         * Create a The thrift implementation for a thrift server
+         * Create the thrift implementation
          * Parameters:
-         *  dbContext: A valid dbcontext who is the repo from the server 
+         *  dbContext: A valid dbcontext which will be used as Repository from the Server 
          */
         public ThriftImplementation(MyDbContext dbContext)
         {
@@ -36,12 +36,12 @@ namespace Server
          * Add a new Message in a Chat, and notify logged Users in Chat
          * Parameters:
          *  messageContent: The content of the Message
-         *  chatId: The Id(guid) from a Chat,  in which the Message was sent
-         *  nameOfShipper: Name of a User, who add the Message
+         *  chatId: The Id(guid) from a Chat,  to which the Message was sent
+         *  nameOfShipper: Name of a User, who adds the Message
          * Return:
          *  Default true
          * Exception:
-         *  ChatException: if chat don't exist in db.
+         *  ChatException: if chat doesn't exist in db.
          */
         public Task<bool> AddNewMessage(string messageContent, string idChat, string nameOfShipper, CancellationToken cancellationToken = default)
         {
@@ -55,9 +55,10 @@ namespace Server
             catch (InvalidOperationException)
             {
                 _mut.ReleaseMutex();
+                _log.Warn("idChat doesn't exist in db\n");
                 throw new ChatException()
                 {
-                    Message = "idChat is Wrong"
+                    Message = "Chat doesn't exist in db"
                 };
             }
             _dbContext.Add(new Model.Message()
@@ -82,7 +83,7 @@ namespace Server
                 .ToList()
                 .ForEach(x =>
                 {
-                    if (x.IsMuted == false) // if is muted don't change in db the NewMessagesInChat variable for this User
+                    if (x.IsMuted == false) // if User have the Chat muted doesn't change the NewMessagesInChat variable for this User
                     {
                         x.NewMessagesInChat += 1;
                     }
@@ -106,7 +107,7 @@ namespace Server
          * Return:
          *  The new User who was created from the data
          * Exception: 
-         *  ChatException: Is User already exist (Name is Unique) 
+         *  ChatException: User already exists (Name is Unique) 
          */
         public Task<User> AddNewUser(string name, string password, CancellationToken cancellationToken = default)
         {
@@ -115,7 +116,7 @@ namespace Server
             if (_dbContext.Users.Any(x => name == x.Name))
             {
                 _mut.ReleaseMutex();
-                _log.Warn("The User already exists");
+                _log.Warn("The User already exists\n");
                 throw new ChatException()
                 {
                     Message = "User already exists"
@@ -169,9 +170,10 @@ namespace Server
             catch (InvalidOperationException)
             {
                 _mut.ReleaseMutex();
+                _log.Warn("idUser doesn't exist in db\n");
                 throw new ChatException()
                 {
-                    Message = "IdChat Invalid"
+                    Message = "Your User doesn't exist in db"
                 };
             }
             try
@@ -181,26 +183,27 @@ namespace Server
             catch (InvalidOperationException)
             {
                 _mut.ReleaseMutex();
+                _log.Warn("Name of friend doesn't exist in db\n");
                 throw new ChatException()
                 {
-                    Message = "Don't exist a user whit that Name"
+                    Message = "Doesn't exist a User with that name"
                 };
             }
             _mut.ReleaseMutex();
             if (user1.IdUser == user2.IdUser)
             {
 
-                _log.Warn("TO and From User are the same");
+                _log.Warn("To and From User are the same\n");
                 throw new ChatException()
                 {
-                    Message = "Same User"
+                    Message = "You can't add you to friend"
                 };
             }
             _mut.WaitOne();
             if (_dbContext.FriendRequests.Any(x => x.IdFromUser == user1.IdUser && x.IdToUser == user2.IdUser))
             {
                 _mut.ReleaseMutex();
-                _log.Warn("The Request already exists");
+                _log.Warn("The Request already exists\n");
                 throw new ChatException()
                 {
                     Message = "Request Are set to"
@@ -209,16 +212,16 @@ namespace Server
             if (_dbContext.FriendRequests.Any(x => x.IdFromUser == user2.IdUser && x.IdToUser == user1.IdUser))
             {
                 _mut.ReleaseMutex();
-                _log.Warn("The Request already exists by the other part");
+                _log.Warn("The Request already exists by the other part\n");
                 throw new ChatException()
                 {
-                    Message = "The Other User are set a request to you, you can't set a request too"
+                    Message = "The Other User sent a request to you, you can't send a request back"
                 };
             }
             if (_dbContext.Friends.Any(x => (x.IdUser1 == user1.IdUser || x.IdUser1 == user2.IdUser) && (x.IdUser2 == user1.IdUser || x.IdUser2 == user2.IdUser)))
             {
                 _mut.ReleaseMutex();
-                _log.Warn("The Users are friends already");
+                _log.Warn("The Users are friends already\n");
                 throw new ChatException()
                 {
                     Message = "You and the other User are already friends"
@@ -341,13 +344,13 @@ namespace Server
             var list = _dbContext.FriendRequests.Where(x => x.IdToUser == Guid.Parse(idUser)); //All FriendRequest where ToUser is the User 
             var list2 = _dbContext.Users.Where(x => list.Any(y => y.IdFromUser == x.IdUser)); //All User where The User is FromUser in FriendRequest
             _mut.ReleaseMutex();
-            _log.Info("All the User which sed a FriendRequest to User Are Found. Start preparing data to export");
+            _log.Info("All the User who sent a FriendRequest to User Are Found. Start preparing data to export");
             var listT = new List<User>();
             list2.ToList().ForEach(x => listT.Add(new User()  //Model.User to Thrift.Model
             {
                 IdUser = x.IdUser.ToString(),
                 Name = x.Name,
-                Password = null, //set Password and NrOfFriendRequest to default, because the the User don't need to know and don't have acces to this information
+                Password = null, //set Password and NrOfFriendRequest to default, because the the User doesn't need to know and doesn't have acces to this information
                 NrOfFriendRequests = 0
             }));
             _log.Info("GetFromUsersInFriendRequestFromUser completed and export the list of User\n");
@@ -360,11 +363,11 @@ namespace Server
          *  name: Name of a User who try login
          *  password: Password of a User who try login
          * Return:
-         *  The complet User which all parameters 
+         *  Complete user with all parameters 
          * Exception:
          *  ChatException:
-         *   If User don't exist in db from this name and password
-         *   If User was alredy logged in program
+         *   If the user donesn't exist in db with that name and password
+         *   If User was already logged in program
          */
         public Task<User> Login(string name, string password, CancellationToken cancellationToken = default)
         {
@@ -378,7 +381,7 @@ namespace Server
             catch (Exception)
             {
                 _mut.ReleaseMutex();
-                _log.Warn("Wrong name of Password");
+                _log.Warn("Wrong name or Password\n");
                 throw new ChatException()
                 {
                     Message = "Wrong Name or Password"
@@ -387,7 +390,7 @@ namespace Server
             _mut.ReleaseMutex();
             if (_loggedUsers.Any(x => x.Equals(user.IdUser)))
             {
-                _log.Warn("User was logged");
+                _log.Warn("User was logged\n");
                 throw new ChatException()
                 {
                     Message = "User was logged"
@@ -412,7 +415,7 @@ namespace Server
          *  default true 
          * Exception:
          *  ChatException:
-         *   If User don't exist in db from this name and password
+         *   If the user donesn't exist in db with that name and password
          *   If User was not logged in program
          */
         public Task<bool> Logout(string idUser, CancellationToken cancellationToken = default)
@@ -427,22 +430,23 @@ namespace Server
             catch (InvalidOperationException)
             {
                 _mut.ReleaseMutex();
+                _log.Warn("User doesn't exist in db\n");
                 throw new ChatException()
                 {
-                    Message = "User don't exist in db"
+                    Message = "User doesn't exist in db"
                 };
             }
             _mut.ReleaseMutex();
             var ok = _loggedUsers.Remove(Guid.Parse(idUser));
             if (ok == false)
             {
-                _log.Warn("User was not logged");
+                _log.Warn("User was not logged\n");
                 throw new ChatException()
                 {
                     Message = "User was not logged"
                 };
             }
-            _log.Info("Logout Completed, the User are remove from loggedUsers list\n");
+            _log.Info("Logout Completed, the User are removed from loggedUsers list\n");
             return Task.FromResult(true);
 
         }
@@ -457,7 +461,7 @@ namespace Server
          *  default true
          * Exception:
          *  ChatException:
-         *   UserInChat don't exist in db
+         *   UserInChat doesn't exist in db
          */
         public Task<bool> SetNewMessagesInChatTo0(string idUser, string idChat, CancellationToken cancellationToken = default)
         {
@@ -471,9 +475,10 @@ namespace Server
             catch (InvalidOperationException)
             {
                 _mut.ReleaseMutex();
+                _log.Warn("User is not in the Chat\n");
                 throw new ChatException()
                 {
-                    Message = "User is not in this Chat"
+                    Message = "Try to set new messages to 0 fail, beacause the user aren't in this Chat"
                 };
             }
             _mut.ReleaseMutex();
@@ -495,7 +500,7 @@ namespace Server
          *  To the value that has been modified IsMuted Parameter
          * Exception:
          *  ChatException:
-         *   UserInChat don't exist in db
+         *   UserInChat doesn't exist in db
          */
         public Task<bool> IsMutedChangeFromAnUserInAChat(string idUser, string idChat, CancellationToken cancellationToken = default)
         {
@@ -509,6 +514,7 @@ namespace Server
             catch (InvalidOperationException)
             {
                 _mut.ReleaseMutex();
+                _log.Warn("User is not in the chat\n");
                 throw new ChatException()
                 {
                     Message = "User is not in this Chat"
@@ -535,7 +541,7 @@ namespace Server
         #endregion
         #region FriendRequestOptions
         /*
-         * Accept a Friend Request who was set by FromUser to ToUser and creating the relacion beetween they
+         * Accept a Friend Request who was set by FromUser to ToUser and creating the relation beetween they
          * Parameters:
          *  idToUser (ToUser): Id(Guid) from the User who recive the request
          *  idFromUser (From User): Id(guid) from the User who send the request
@@ -543,9 +549,9 @@ namespace Server
          *  default true:
          * Exception:
          *  ChatException: 
-         *   Is FriendRequest don't exist from FromUser and ToUser
-         *   FromUser don't exist in db
-         *   ToUser don't exist in db
+         *   Is FriendRequest doesn't exist from FromUser and ToUser
+         *   FromUser doesn't exist in db
+         *   ToUser doesn't exist in db
          */
         public Task<bool> AcceptFriendRequest(string idToUser, string idFromUser, CancellationToken cancellationToken = default)
         {
@@ -559,9 +565,10 @@ namespace Server
             catch (InvalidOperationException)
             {
                 _mut.ReleaseMutex();
+                _log.Warn("FriendRequest doesn't exist from this 2 users\n");
                 throw new ChatException()
                 {
-                    Message = "FriendRequest don't exist from this 2 users"
+                    Message = "FriendRequest doesn't exist from this 2 users"
                 };
             }
             _mut.ReleaseMutex();
@@ -575,9 +582,10 @@ namespace Server
             catch (InvalidOperationException)
             {
                 _mut.ReleaseMutex();
+                _log.Info("ToUser doesn't exist in db");
                 throw new ChatException()
                 {
-                    Message = "ToUser not exist in db"
+                    Message = "ToUser doesn't exist in db"
                 };
             }
             try
@@ -587,9 +595,10 @@ namespace Server
             catch (InvalidOperationException)
             {
                 _mut.ReleaseMutex();
+                _log.Info("FromUser doesn't exist in db");
                 throw new ChatException()
                 {
-                    Message = "FromUser not exist in db"
+                    Message = "FromUser doesn't exist in db"
                 };
             }
             _mut.ReleaseMutex();
@@ -601,7 +610,7 @@ namespace Server
                 IsCreateDefault = true,
                 LastMessageDate = DateTime.Now //default is now
             };
-            _log.Info("Configuracion completed, start db part");
+            _log.Info("Configuration completed, start db part");
             _mut.WaitOne();
             _dbContext.Add(new Model.Friend() 
             {
@@ -626,7 +635,7 @@ namespace Server
             _dbContext.Update(user1);
             _dbContext.SaveChanges();
             _mut.ReleaseMutex();
-            _log.Info("All db part donem start notify part");
+            _log.Info("All db part done, start notify part");
             #region notify
             _rabbitmq.FriendRequest(user1);
             _rabbitmq.NewChat(user1);
@@ -639,7 +648,7 @@ namespace Server
             return Task.FromResult(true);
         }
         /*
-         * Deny a friendReques who set FromUser to ToUser
+         * Deny a friendReques which set FromUser to ToUser
          * Parameters:
          *  idToUser (ToUser): Id(Guid) from the User who recive the request
          *  idFromUser (From User): Id(guid) from the User who send the request
@@ -661,18 +670,19 @@ namespace Server
             catch (InvalidOperationException)
             {
                 _mut.ReleaseMutex();
+                _log.Warn("FriendRequest doesn't exist from this 2 users\n");
                 throw new ChatException()
                 {
-                    Message = "FriendRequest don't exist from this 2 users"
+                    Message = "FriendRequest doesn't exist from this 2 users"
                 };
             }
             _mut.ReleaseMutex();
             if (request == null)
             {
-                _log.Warn("FriendRequest don't exist between Users");
+                _log.Warn("FriendRequest doesn't exist between Users\n");
                 throw new ChatException()
                 {
-                    Message = "FriendRequest don't exist"
+                    Message = "FriendRequest doesn't exist"
                 };
             }
 

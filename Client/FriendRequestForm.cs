@@ -145,7 +145,7 @@ namespace Client
             }
         }
         /*
-         * When the form is close notify parent ChatFrom it was closed 
+         * When the form is close notify parent ChatFrom that it has been closed 
          */
         private void FriendRequestForm_FormClosed(object sender, FormClosedEventArgs e)
         {

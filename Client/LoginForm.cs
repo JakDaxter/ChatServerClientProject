@@ -11,7 +11,6 @@ namespace Client
 
         private ChatForm _form;
         private readonly Service.Client _client;
-        private IConnection _connection;
         private IMyRabbitMQConsumer _rabbitMQ;
         public LoginForm(Service.Client client, IMyRabbitMQConsumer rabbitMQ)
         {
@@ -21,7 +20,7 @@ namespace Client
             _log.Info("LoginForm Created\n");
         }
         /*
-         * Using to set a ChatFrom, because this from is created first
+         * Using to set a ChatFrom
          */
         public void setChatForm(ChatForm form)
         {

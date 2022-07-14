@@ -10,26 +10,26 @@ namespace Server
     public interface IMyRabbitMQProducer
     {
         /*
-         * CloseConnection if is open
+         * Close Connection if it is open
          */
         public void CloseConnection();
         /*
          * Put Message to a Queue
          * Parameter:
-         *  messageContent: The menssage who is set
-         *  user: user.Id use to routingKey
+         *  messageContent: The message which is set
+         *  user: user.Id is used as routingKey
          */
         public void NewMessageInConversation(string messageContent, User user);
         /*
          * Put user nr of request to a Queue
          * Parameter:
-         *  user: user.Id use to routingKey and user.NrOfFriendRequests use to menssage
+         *  user: user.Id is used as routingKey and user.NrOfFriendRequests is used to message
          */
         public void FriendRequest(User user);
         /*
          * put "NewChat" in to a Queue
          * Parameter:
-         *  user: user.Id use to routingKey
+         *  user: user.Id is used as routingKey
          */
         public void NewChat(User user);
     }

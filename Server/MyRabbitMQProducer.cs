@@ -17,7 +17,7 @@ namespace Server
         private IModel thisChannel;
         private IConnection thisConnection;
         /*
-         * Creating a RabbitMQProducer and set connection and channel for class
+         * Creating a RabbitMQProducer and setting connection and channel for class
          * Ip:localhost
          * Exchange: "ChatServerClientProject" type: "Direct"
          */
@@ -37,7 +37,7 @@ namespace Server
             _log.Info("Created a RabbitMQ Producer");
         }
         /*
-         * Close Connection if is open
+         * Close Connection if it is open
          */
         public void CloseConnection()
         {
@@ -50,9 +50,9 @@ namespace Server
             _log.Info("The connection is not open");
         }
         /*
-         * put a FriendRequest message in a Queue
+         * Put a FriendRequest message in a Queue
          * Parameter:
-         *  user: user.Id use to routingKey and user.NrOfFriendRequests use to menssage
+         *  user: user.Id is used as routingKey and user.NrOfFriendRequests is used to message
          * NotifyFormat:
          *  [FriendRequest]FriendTrquest: {0}
          *  Encoding.UTF8
@@ -68,8 +68,8 @@ namespace Server
         /*
          * Put Message to a Queue
          * Parameter:
-         *  messageContent: The menssage who is set
-         *  user: user.Id use to routingKey
+         *  messageContent: The message who is set
+         *  user: user.Id is used as routingKey
          * NotifyFormat:
          *  [NewMessageInConversation]{0}
          *  Encoding.UTF8
@@ -85,7 +85,7 @@ namespace Server
         /*
         * put "NewChat" in to a Queue
         * Parameter:
-        *  user: user.Id use to routingKey
+        *  user: user.Id is used as routingKey
         * NotifyFormat:
         *  [NewChat]
         *  Encoding.UTF8
